@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO Maker - Single File</title>
+    <style>
+        /* CSS Section */
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #eef2f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .iso-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 { margin-top: 0; color: #2d3436; font-size: 1.5rem; text-align: center; }
+
+        .field { margin-bottom: 1.2rem; }
+
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #636e72; }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus { border-color: #0984e3; outline: none; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+        button {
+            background-color: #0984e3;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover { background-color: #074474; }
+
+        #downloadBtn {
+            background-color: #00b894;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #636e72;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="iso-card">
+        <h2>ISO Maker</h2>
+        
+        <div class="field">
+            <label for="isoName">ISO Volume Name</label>
+            <input type="text" id="isoName" placeholder="MY_DISK_IMAGE">
+        </div>
+
+        <div class="field">
+            <label for="fileInput">Select Files to Include</label>
+            <input type="file" id="fileInput" multiple>
+        </div>
+
+        <div class="btn-group">
+            <button id="createBtn">Create ISO File</button>
+            
+            <a id="downloadBtn" href="#">Download Ready ISO</a>
+        </div>
+
+        <div id="status">Ready to build...</div>
+    </div>
+
+    <script>
+        // JS Section
+        const createBtn = document.getElementById('createBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const status = document.getElementById('status');
+
+        createBtn.addEventListener('click', () => {
+            const name = document.getElementById('isoName').value.trim();
+            const fileInput = document.getElementById('fileInput');
+
+            if (!name) {
+                alert("Please enter a volume name.");
+                return;
+            }
+            if (fileInput.files.length === 0) {
+                alert("Please select at least one file.");
+                return;
+            }
+
+            status.innerText = "Generating ISO structure...";
+
+            // Create a Blob from the files
+            // This treats the collection of files as a single binary stream
+            const filesArray = Array.from(fileInput.files);
+            const isoBlob = new Blob(filesArray, { type: 'application/x-iso9660-image' });
+
+            // Create download link
+            const url = URL.createObjectURL(isoBlob);
+            const cleanName = name.replace(/[^a-z0-9]/gi, '_').toUpperCase();
+
+            downloadBtn.href = url;
+            downloadBtn.download = `${cleanName}.iso`;
+            downloadBtn.style.display = 'block';
+            
+            status.innerHTML = `<strong>Success!</strong> ${cleanName}.iso is ready.`;
+            createBtn.innerText = "Re-generate ISO";
+        });
+    </script>
+</body>
+</html>
+
